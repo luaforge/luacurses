@@ -104,6 +104,94 @@ char* luacurses_screen_tostring(SCREEN* s)
     return buf;  
 }
 
+/**********************************************************************/
+
+/*
+ * Garbage collection (by Claude Marinier)
+ *
+ * Userdata which is dead and has a finalizer (a __gc field in its
+ * metatable) is not collected immediately by the garbage collector.
+ * Instead, Lua puts it in a list. After collection, Lua does the
+ * equivalent of the following function for each userdata in that
+ * list:
+ *
+ *    function gc_event (udata)
+ *        local h = metatable(udata).__gc
+ *        if h then
+ *            h(udata)
+ *        end
+ *    end
+ *
+ * The above paragraph and pseude-code were taken from the Lua 5.1
+ * manual. They imply that the finalize function is called with the
+ * userdata as the only parameter. Seems it is actually called with
+ * the Lua state.  Aha! the userdata is passed as a Lua arg, hence
+ * the need for a lua_State.
+ *
+ * In "Programming In Lua", section 29.1, there is an example of a
+ * gc metamethod.
+ *
+ *     static int dir_gc (lua_State *L) {
+ *         DIR *d = *(DIR **)lua_touserdata(L, 1);
+ *         if (d) closedir(d);
+ *         return 0;
+ *     }
+ */
+
+int luacurses_screen_free(lua_State* L)
+{
+    SCREEN** pscreen = (SCREEN**) luaL_checkudata(L, 1, MKLUALIB_META_CURSES_SCREEN);
+    if (!pscreen)
+    {
+	return luaL_argerror(L,	1, "bad screen, screen_gc");
+    }
+    if (*pscreen)
+    {
+	delscreen(*pscreen);
+	*pscreen = 0;  /* make sure we only do this once */
+    }
+    return 0;
+}
+
+int luacurses_window_free(lua_State* L)
+{
+    WINDOW** pwindow = (WINDOW**) luaL_checkudata(L, 1, MKLUALIB_META_CURSES_WINDOW);
+    if (!pwindow)
+    {
+	return luaL_argerror(L, 1, "bad window, win_gc");
+    }
+    if (*pwindow)
+    {
+	/*
+	 * the Lua value created by curses.stdscr() will
+	 * eventually end up here
+	 * do not delete the corresponding stdscr window
+	 */
+	if(*pwindow != stdscr) delwin(*pwindow);
+	*pwindow = 0;   /* make sure we only do this once */
+    }
+    return 0;
+}
+
+int luacurses_delscreen(lua_State* L)
+{
+    SCREEN** pscreen = (SCREEN**) luaL_checkudata(L, 1, MKLUALIB_META_CURSES_SCREEN);
+    if (!pscreen)
+    {
+	return luaL_argerror(L, 1, "bad screen, delscreen");
+    }
+    if (!*pscreen)
+    {
+	return luaL_error(L, "attempt to use invalid screen, delscreen");
+    }
+    delscreen(*pscreen);
+    *pscreen = 0;  /* make sure we only do this once */
+    return 0;
+}
+
+/**********************************************************************/
+
+
 bool luacurses_getmouse(short* id, int* x, int* y, int* z, mmask_t* bstate)
 {
     MEVENT e;

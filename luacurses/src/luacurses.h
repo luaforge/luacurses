@@ -29,8 +29,9 @@ char* luacurses_wgetstr(WINDOW* w);
 char* luacurses_window_tostring(WINDOW* w);
 char* luacurses_screen_tostring(SCREEN* s);
 
-#define luacurses_window_free(w) {delwin(w); w = 0;}
-#define luacurses_screen_free(s) {delscreen(s); s = 0;}
+int luacurses_window_free(lua_State* L);
+int luacurses_screen_free(lua_State* L);
+int luacurses_delscreen(lua_State* L);
 
 bool luacurses_getmouse(short* id, int* x, int* y, int* z, mmask_t* bstate);
 bool luacurses_ungetmouse (short id, int x, int y, int z, mmask_t bstate);

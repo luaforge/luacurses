@@ -1,6 +1,7 @@
 
 prefix = "mklualib";
-lua_state_name = prefix .. "_lua_state";
+lua_state_name = "L";
+--lua_state_name = prefix .. "_lua_state";
 
 mklualib_functions = [[
 #include <stdlib.h>
@@ -218,6 +219,7 @@ for l in io.lines(infile) do
 	    local b, e, ret_type, c_name, arg_list, not_fun, ret_free, rest = string.find(l,
 						    "^(.*[%s%*])([%a_][%w_]*)%s*%((.*)%)%s*;%s*(%%?)%s*(%$?)(.*)$");
 	    my_assert(rest, "cannot parse line");
+	    local b, e, plain, rest = string.find(rest, "^%s*(=?)(.*)$");
 	    local b, e, first, trans, last = string.find(rest, "^([^%^]*)(%^?)(.*)$");
 	    local b, e, lua_name = string.find(first, "^%s*@([%a_][%w_]*)%s*$");
 	    local t_lua_name = nil;
@@ -244,107 +246,111 @@ for l in io.lines(infile) do
 	    end
 	    f:write("int " .. fun_name .. "(lua_State* " .. lua_state_name .. ")\n{\n");
 	    
-	    ret_type = string.gsub(ret_type, "const", "");
-	    ret_type = std_type(ret_type);
-	    local ret_name = fun_name .. "_ret";
-	    
-	    local arg_table = {};
-	    local ret_table = {};
-	    if (known_type(ret_type) ~= "void") then
-		table.insert(ret_table, {Type = ret_type, Name = ret_name});
-	    end
-	    for _arg in string.gfind(arg_list, "([^,]+),?") do
-		local b, e, arg_val = string.find(_arg, "^%s*%%(.*)$");
-		if (arg_val) then
-		    table.insert(arg_table, {Value = arg_val;});
-		else
-		    _arg = string.gsub(_arg, "const", "");
-		    local b, e, arg_type, arg_mod, arg_name = string.find(_arg, "%s*([%w_]+[%s%*]*)(&?!?%^?)%s*([%a_]?[%w_]*)%s*,?");
-		    if (string.len(arg_name) == 0) then
-			arg_name = "_arg" .. table.getn(arg_table);
-		    end
-		    if (known_type(arg_type) == "void") then break; end
-		    arg_type = std_type(arg_type);
-		    if (string.find(arg_mod, "&")) then
-			table.insert(ret_table, {Type = arg_type, Name = arg_name});
-		    end
-		    local ld_mod = true;
-		    local arg_pointer = false;
-		    if (string.find(arg_mod, "!")) then ld_mod = false; end
-		    if (string.find(arg_mod, "%^")) then arg_pointer = true; end
-		    table.insert(arg_table, {Type = arg_type, Mode = ld_mod, Pointer = arg_pointer, Name = arg_name});
-		end
-	    end
-
-	    if (meta_name) then
-		my_assert(std_type(arg_table[1].Type, true) == meta_name, "expected arg #1 of type '" .. meta_name .. "', found '" ..
-			  arg_table[1].Type .. "'");
-	    end
-	    
-	    
-	    --local self_name = fun_name .. "_self";
-	    table.foreachi(arg_table, function(_i, _v)
-		if (not _v.Name) then return; end
-		local _type = known_type(_v.Type);
-		my_assert(_type, "unknown type '" .. _v.Type .. "'");
-		if (_type == "void") then
-		    my_assert(false, "function arg cannot be 'void'");
-		elseif (_type == "number") or (_type == "string") or (_type == "boolean") then
-		    f:write("\t" .. _v.Type .. " " .. _v.Name);
-		    if (_v.Mode) then
-			f:write(" = (" .. _v.Type .. ") lua_to" .. _type .. "(" .. lua_state_name .. ", " .. _i .. ");\n");
-		    else
-			f:write(";\n");
-		    end
-		elseif (_type == "char") then
-		    f:write("\t" .. _v.Type .. " " .. _v.Name .. " = (" .. _v.Type .. ") lua_tostring(" ..
-			    lua_state_name .. ", " .. _i .. ")[0];\n");
-		elseif (_type == "userdata") then
-		    f:write("\t" .. _v.Type .. " " .. _v.Name .. " = " .. get_to_fun(_v.Type) .. "(" ..
-			    lua_state_name .. ", " .. _i .. ");\n");
-		end
-	    end);
-	    f:write("\t");
-
-	    
-	    if (ret_type ~= "void") then
-		f:write(ret_type .. " " .. ret_name .. " = (" .. ret_type .. ") ");
-	    end
-	    if (string.len(not_fun) > 0) then
-		f:write(c_name .. ";\n");
+	    if (string.len(plain) > 0) then
+		f:write("\treturn " .. c_name .. "(" .. lua_state_name .. ");\n}\n\n");
 	    else
-		f:write(c_name .. "(");
-		table.foreachi(arg_table, function(_i, _v)
-		    if (_v.Value) then
-			f:write(_v.Value);
+		ret_type = string.gsub(ret_type, "const", "");
+		ret_type = std_type(ret_type);
+		local ret_name = fun_name .. "_ret";
+
+		local arg_table = {};
+		local ret_table = {};
+		if (known_type(ret_type) ~= "void") then
+		    table.insert(ret_table, {Type = ret_type, Name = ret_name});
+		end
+		for _arg in string.gfind(arg_list, "([^,]+),?") do
+		    local b, e, arg_val = string.find(_arg, "^%s*%%(.*)$");
+		    if (arg_val) then
+			table.insert(arg_table, {Value = arg_val;});
 		    else
-			if (_v.Pointer) then f:write("&"); end
-			f:write(_v.Name);
+			_arg = string.gsub(_arg, "const", "");
+			local b, e, arg_type, arg_mod, arg_name = string.find(_arg, "%s*([%w_]+[%s%*]*)(&?!?%^?)%s*([%a_]?[%w_]*)%s*,?");
+			if (string.len(arg_name) == 0) then
+			    arg_name = "_arg" .. table.getn(arg_table);
+			end
+			if (known_type(arg_type) == "void") then break; end
+			arg_type = std_type(arg_type);
+			if (string.find(arg_mod, "&")) then
+			    table.insert(ret_table, {Type = arg_type, Name = arg_name});
+			end
+			local ld_mod = true;
+			local arg_pointer = false;
+			if (string.find(arg_mod, "!")) then ld_mod = false; end
+			if (string.find(arg_mod, "%^")) then arg_pointer = true; end
+			table.insert(arg_table, {Type = arg_type, Mode = ld_mod, Pointer = arg_pointer, Name = arg_name});
 		    end
-		    if (_i < table.getn(arg_table)) then
-			f:write(", ");
+		end
+
+		if (meta_name) then
+		    my_assert(std_type(arg_table[1].Type, true) == meta_name, "expected arg #1 of type '" .. meta_name .. "', found '" ..
+		    arg_table[1].Type .. "'");
+		end
+
+
+		--local self_name = fun_name .. "_self";
+		table.foreachi(arg_table, function(_i, _v)
+		    if (not _v.Name) then return; end
+		    local _type = known_type(_v.Type);
+		    my_assert(_type, "unknown type '" .. _v.Type .. "'");
+		    if (_type == "void") then
+			my_assert(false, "function arg cannot be 'void'");
+		    elseif (_type == "number") or (_type == "string") or (_type == "boolean") then
+			f:write("\t" .. _v.Type .. " " .. _v.Name);
+			if (_v.Mode) then
+			    f:write(" = (" .. _v.Type .. ") lua_to" .. _type .. "(" .. lua_state_name .. ", " .. _i .. ");\n");
+			else
+			    f:write(";\n");
+			end
+		    elseif (_type == "char") then
+			f:write("\t" .. _v.Type .. " " .. _v.Name .. " = (" .. _v.Type .. ") lua_tostring(" ..
+			lua_state_name .. ", " .. _i .. ")[0];\n");
+		    elseif (_type == "userdata") then
+			f:write("\t" .. _v.Type .. " " .. _v.Name .. " = " .. get_to_fun(_v.Type) .. "(" ..
+			lua_state_name .. ", " .. _i .. ");\n");
 		    end
 		end);
-		f:write(");\n");
-	    end
-	    table.foreachi(ret_table, function(_i, _v)
-		local _type = known_type(_v.Type);
-		my_assert(_type, "unknown type '" .. _v.Type .. "'");
-		if (_type == "number") or (_type == "string") or (_type == "boolean") then
-		    f:write("\tlua_push" .. _type .. "(" .. lua_state_name .. ", " .. _v.Name .. ");\n");
-		elseif (_type == "char") then
-		    f:write("\tlua_pushlstring(" .. lua_state_name .. ", &" .. _v.Name .. ", 1);\n");
-		elseif (_type == "userdata") then
-		    f:write("\t" .. _v.Type .. "* " .. _v.Name .. "_retptr = " .. get_new_fun(_v.Type) .. "(" ..
-			    lua_state_name .. ");\n");
-		    f:write("\t*" .. _v.Name .. "_retptr = " .. _v.Name .. ";\n");
+		f:write("\t");
+
+
+		if (ret_type ~= "void") then
+		    f:write(ret_type .. " " .. ret_name .. " = (" .. ret_type .. ") ");
 		end
-	    end);
-	    if (string.len(ret_free) ~= 0) then
-		f:write("\tfree(" .. ret_name .. ");\n");
+		if (string.len(not_fun) > 0) then
+		    f:write(c_name .. ";\n");
+		else
+		    f:write(c_name .. "(");
+		    table.foreachi(arg_table, function(_i, _v)
+			if (_v.Value) then
+			    f:write(_v.Value);
+			else
+			    if (_v.Pointer) then f:write("&"); end
+			    f:write(_v.Name);
+			end
+			if (_i < table.getn(arg_table)) then
+			    f:write(", ");
+			end
+		    end);
+		    f:write(");\n");
+		end
+		table.foreachi(ret_table, function(_i, _v)
+		    local _type = known_type(_v.Type);
+		    my_assert(_type, "unknown type '" .. _v.Type .. "'");
+		    if (_type == "number") or (_type == "string") or (_type == "boolean") then
+			f:write("\tlua_push" .. _type .. "(" .. lua_state_name .. ", " .. _v.Name .. ");\n");
+		    elseif (_type == "char") then
+			f:write("\tlua_pushlstring(" .. lua_state_name .. ", &" .. _v.Name .. ", 1);\n");
+		    elseif (_type == "userdata") then
+			f:write("\t" .. _v.Type .. "* " .. _v.Name .. "_retptr = " .. get_new_fun(_v.Type) .. "(" ..
+			lua_state_name .. ");\n");
+			f:write("\t*" .. _v.Name .. "_retptr = " .. _v.Name .. ";\n");
+		    end
+		end);
+		if (string.len(ret_free) ~= 0) then
+		    f:write("\tfree(" .. ret_name .. ");\n");
+		end
+		f:write("\treturn " .. table.getn(ret_table) .. ";\n");
+		f:write("}\n\n");
 	    end
-	    f:write("\treturn " .. table.getn(ret_table) .. ";\n");
-	    f:write("}\n\n");
 	end
     end
     sn = sn + 1;
@@ -392,7 +398,7 @@ table.foreach(modules, function(_name, _module)
 	lua_tname = get_module_name(_name);
     else lua_tname = "0";
     end
-    f:write("int " .. prefix .. "_open_" .. _name .. "(lua_State* " .. lua_state_name .. ")\n{\n");
+    f:write("int luaopen_" .. _name .. "(lua_State* " .. lua_state_name .. ")\n{\n");
     table.foreach(_module.Metas, function(_m_name, _meta)
 	f:write("\t" .. prefix .. "_create_" .. _name .. "_" .. meta_c_names[_m_name] .. "(" .. lua_state_name .. ");\n");
     end);

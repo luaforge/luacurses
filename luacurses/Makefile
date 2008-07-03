@@ -1,15 +1,19 @@
 
 SRC=src/curses.c src/luacurses.c
 INCLUDE=src
-CFLAGS=-shared -ansi -Wall -O2 -I$(INCLUDE)
+LUA_CFLAGS=-I/usr/include/lua5.1
+CFLAGS=-shared -ansi -Wall -O2 -I$(INCLUDE) $(LUA_CFLAGS) -fPIC
+SYMLINK=ln -s
 
-all: lib/luacurses.so
+all: lib/curses.so
 
-lib/luacurses.so: $(SRC)
+lib/curses.so: $(SRC)
 	if ! [ -d lib ]; then mkdir lib; fi
-	gcc $(CFLAGS) -o lib/luacurses.so $(SRC)
+	gcc $(CFLAGS) -o lib/curses.so $(SRC)
+	$(SYMLINK) ../lib/curses.so test/curses.so
 
 clean:
+	if [ -L test/curses.so ]; then rm test/curses.so; fi
 	rm -Rf lib
 	
 	
