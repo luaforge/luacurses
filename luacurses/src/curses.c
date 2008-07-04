@@ -485,10 +485,7 @@ int mklualib_curses_clearok(lua_State* L)
 /* WINDOW*:delwin */
 int mklualib_curses_delwin(lua_State* L)
 {
-	WINDOW* _arg0 = luacurses_towindow(L, 1);
-	int mklualib_curses_delwin_ret = (int) delwin(_arg0);
-	lua_pushnumber(L, mklualib_curses_delwin_ret);
-	return 1;
+	return luacurses_delwin(L);
 }
 
 /* curses.derwin */

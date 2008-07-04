@@ -105,20 +105,20 @@ int ACS_SSSS();%
 !meta FILE*; ! @file @tofile @newfile @luacurses_regfile
 
 !meta SCREEN*; @screen @luacurses_toscreen @luacurses_newscreen @luacurses_regscreen
-void luacurses_delscreen (luaState*);= @delscreen ^ @delscreen
+void luacurses_delscreen (lua_State*);= @delscreen ^ @delscreen
 SCREEN * set_term (SCREEN *); ^
 char* luacurses_screen_tostring(SCREEN* s);$ @__tostring
-void luacurses_screen_free(luaState*);= @__gc
+void luacurses_screen_free(lua_State*);= @__gc
 !endmeta SCREEN*;
 
 !meta WINDOW*; @window @luacurses_towindow @luacurses_newwindow @luacurses_regwindow
 
 char* luacurses_window_tostring(WINDOW* w);$ @__tostring
-void luacurses_window_free(luaState*);= @__gc
+void luacurses_window_free(lua_State*);= @__gc
 
 int box (WINDOW *, chtype, chtype); ^
 int clearok (WINDOW *,bool); ^
-int delwin (WINDOW *); ^
+int luacurses_delwin (lua_State*);= @delwin ^ @delwin
 WINDOW * derwin (WINDOW *,int,int,int,int); ^
 WINDOW * dupwin (WINDOW *); ^
 chtype getbkgd (WINDOW *); ^

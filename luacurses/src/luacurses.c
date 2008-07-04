@@ -189,6 +189,23 @@ int luacurses_delscreen(lua_State* L)
     return 0;
 }
 
+int luacurses_delwin(lua_State* L)
+{
+    WINDOW** pwindow = (WINDOW**) luaL_checkudata(L, 1, MKLUALIB_META_CURSES_WINDOW);
+    if (!pwindow)
+    {
+	return luaL_argerror(L, 1, "bad window, delwin");
+    }
+    if (!*pwindow)
+    {
+	return luaL_error(L, "attempt to use invalid window, delwin");
+    }
+    int ret = delwin(*pwindow);
+    *pwindow = 0;	/* make sure we only do this once */
+    lua_pushnumber(L, ret);
+    return 1;
+}
+
 /**********************************************************************/
 
 
