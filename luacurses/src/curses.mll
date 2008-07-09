@@ -104,14 +104,14 @@ int ACS_SSSS();%
 # we can't use standard 'registerfile' because it has wrong format
 !meta FILE*; ! @file @tofile @newfile @luacurses_regfile
 
-!meta SCREEN*; @screen @luacurses_toscreen @luacurses_newscreen @luacurses_regscreen
+!meta SCREEN*;* @screen @luacurses_toscreen @luacurses_newscreen @luacurses_regscreen
 void luacurses_delscreen (lua_State*);= @delscreen ^ @delscreen
 SCREEN * set_term (SCREEN *); ^
 char* luacurses_screen_tostring(SCREEN* s);$ @__tostring
 void luacurses_screen_free(lua_State*);= @__gc
 !endmeta SCREEN*;
 
-!meta WINDOW*; @window @luacurses_towindow @luacurses_newwindow @luacurses_regwindow
+!meta WINDOW*;* @window @luacurses_towindow @luacurses_newwindow @luacurses_regwindow
 
 char* luacurses_window_tostring(WINDOW* w);$ @__tostring
 void luacurses_window_free(lua_State*);= @__gc
@@ -140,7 +140,7 @@ int mvwaddstr (WINDOW *, int, int, const char *); @mvaddstr ^
 int mvwchgat (WINDOW *, int, int, int, attr_t, short, %0); @mvchgat ^
 int mvwdelch (WINDOW *, int, int); @mvdelch ^
 int mvwgetch (WINDOW *, int, int); @mvgetch ^
-char* luacurses_mvwgetnstr (WINDOW *, int, int, int); @mvgetnstr ^ @mvwgetnstr
+char* luacurses_mvwgetnstr (WINDOW *, int, int, int);$ @mvgetnstr ^ @mvwgetnstr
 #char* luacurses_mvwgetstr (WINDOW *, int, int); @mvgetstr ^ @mvwgetstr
 int mvwhline (WINDOW *, int, int, chtype, int); @mvhline ^
 int mvwin (WINDOW *,int,int); @mvin ^
@@ -192,7 +192,7 @@ int wdeleteln (WINDOW *); @deleteln ^
 int wechochar (WINDOW *, const chtype); @echochar ^
 int werase (WINDOW *); @erase ^
 int wgetch (WINDOW *); @getch ^
-char* luacurses_wgetnstr (WINDOW *,int); @getnstr ^ @wgetnstr
+char* luacurses_wgetnstr (WINDOW *,int);$ @getnstr ^ @wgetnstr
 #char* luacurses_wgetstr (WINDOW *); @getstr ^ @wgetstr
 int whline (WINDOW *, chtype, int); @hline ^
 chtype winch (WINDOW *); @inch ^
@@ -290,7 +290,7 @@ void filter (void);
 int flash (void);
 int flushinp (void);
 int getch (void);
-char* luacurses_getnstr (int); @getnstr
+char* luacurses_getnstr (int);$ @getnstr
 # char* luacurses_getstr (); @getstr
 WINDOW * getwin (FILE *);
 int halfdelay (int);
@@ -325,7 +325,7 @@ int mvchgat (int, int, int, attr_t, short, %0);
 int mvcur (int,int,int,int);
 int mvdelch (int, int);
 int mvgetch (int, int);
-char* luacurses_mvgetnstr (int, int, int); @mvgetnstr
+char* luacurses_mvgetnstr (int, int, int);$ @mvgetnstr
 # char* luacurses_mvgetstr (int, int); @mvgetstr
 int mvhline (int, int, chtype, int);
 chtype mvinch (int, int);

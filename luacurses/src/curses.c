@@ -421,8 +421,12 @@ int mklualib_curses_set_term(lua_State* L)
 {
 	SCREEN* _arg0 = luacurses_toscreen(L, 1);
 	SCREEN* mklualib_curses_set_term_ret = (SCREEN*) set_term(_arg0);
-	SCREEN** mklualib_curses_set_term_ret_retptr = luacurses_newscreen(L);
-	*mklualib_curses_set_term_ret_retptr = mklualib_curses_set_term_ret;
+	if (mklualib_curses_set_term_ret == NULL) lua_pushnil(L);
+	else
+	{
+		SCREEN** mklualib_curses_set_term_ret_retptr = luacurses_newscreen(L);
+		*mklualib_curses_set_term_ret_retptr = mklualib_curses_set_term_ret;
+	}
 	return 1;
 }
 
@@ -498,8 +502,12 @@ int mklualib_curses_derwin(lua_State* L)
 	int _arg3 = (int) lua_tonumber(L, 4);
 	int _arg4 = (int) lua_tonumber(L, 5);
 	WINDOW* mklualib_curses_derwin_ret = (WINDOW*) derwin(_arg0, _arg1, _arg2, _arg3, _arg4);
-	WINDOW** mklualib_curses_derwin_ret_retptr = luacurses_newwindow(L);
-	*mklualib_curses_derwin_ret_retptr = mklualib_curses_derwin_ret;
+	if (mklualib_curses_derwin_ret == NULL) lua_pushnil(L);
+	else
+	{
+		WINDOW** mklualib_curses_derwin_ret_retptr = luacurses_newwindow(L);
+		*mklualib_curses_derwin_ret_retptr = mklualib_curses_derwin_ret;
+	}
 	return 1;
 }
 
@@ -509,8 +517,12 @@ int mklualib_curses_dupwin(lua_State* L)
 {
 	WINDOW* _arg0 = luacurses_towindow(L, 1);
 	WINDOW* mklualib_curses_dupwin_ret = (WINDOW*) dupwin(_arg0);
-	WINDOW** mklualib_curses_dupwin_ret_retptr = luacurses_newwindow(L);
-	*mklualib_curses_dupwin_ret_retptr = mklualib_curses_dupwin_ret;
+	if (mklualib_curses_dupwin_ret == NULL) lua_pushnil(L);
+	else
+	{
+		WINDOW** mklualib_curses_dupwin_ret_retptr = luacurses_newwindow(L);
+		*mklualib_curses_dupwin_ret_retptr = mklualib_curses_dupwin_ret;
+	}
 	return 1;
 }
 
@@ -707,6 +719,7 @@ int mklualib_curses_mvwgetnstr(lua_State* L)
 	int _arg3 = (int) lua_tonumber(L, 4);
 	char* mklualib_curses_mvwgetnstr_ret = (char*) luacurses_mvwgetnstr(_arg0, _arg1, _arg2, _arg3);
 	lua_pushstring(L, mklualib_curses_mvwgetnstr_ret);
+	free(mklualib_curses_mvwgetnstr_ret);
 	return 1;
 }
 
@@ -1244,6 +1257,7 @@ int mklualib_curses_wgetnstr(lua_State* L)
 	int _arg1 = (int) lua_tonumber(L, 2);
 	char* mklualib_curses_wgetnstr_ret = (char*) luacurses_wgetnstr(_arg0, _arg1);
 	lua_pushstring(L, mklualib_curses_wgetnstr_ret);
+	free(mklualib_curses_wgetnstr_ret);
 	return 1;
 }
 
@@ -1518,8 +1532,12 @@ int mklualib_curses_wmouse_trafo(lua_State* L)
 int mklualib_curses_stdscr(lua_State* L)
 {
 	WINDOW* mklualib_curses_stdscr_ret = (WINDOW*) stdscr;
-	WINDOW** mklualib_curses_stdscr_ret_retptr = luacurses_newwindow(L);
-	*mklualib_curses_stdscr_ret_retptr = mklualib_curses_stdscr_ret;
+	if (mklualib_curses_stdscr_ret == NULL) lua_pushnil(L);
+	else
+	{
+		WINDOW** mklualib_curses_stdscr_ret_retptr = luacurses_newwindow(L);
+		*mklualib_curses_stdscr_ret_retptr = mklualib_curses_stdscr_ret;
+	}
 	return 1;
 }
 
@@ -1527,8 +1545,12 @@ int mklualib_curses_stdscr(lua_State* L)
 int mklualib_curses_curscr(lua_State* L)
 {
 	WINDOW* mklualib_curses_curscr_ret = (WINDOW*) curscr;
-	WINDOW** mklualib_curses_curscr_ret_retptr = luacurses_newwindow(L);
-	*mklualib_curses_curscr_ret_retptr = mklualib_curses_curscr_ret;
+	if (mklualib_curses_curscr_ret == NULL) lua_pushnil(L);
+	else
+	{
+		WINDOW** mklualib_curses_curscr_ret_retptr = luacurses_newwindow(L);
+		*mklualib_curses_curscr_ret_retptr = mklualib_curses_curscr_ret;
+	}
 	return 1;
 }
 
@@ -1536,8 +1558,12 @@ int mklualib_curses_curscr(lua_State* L)
 int mklualib_curses_newscr(lua_State* L)
 {
 	WINDOW* mklualib_curses_newscr_ret = (WINDOW*) newscr;
-	WINDOW** mklualib_curses_newscr_ret_retptr = luacurses_newwindow(L);
-	*mklualib_curses_newscr_ret_retptr = mklualib_curses_newscr_ret;
+	if (mklualib_curses_newscr_ret == NULL) lua_pushnil(L);
+	else
+	{
+		WINDOW** mklualib_curses_newscr_ret_retptr = luacurses_newwindow(L);
+		*mklualib_curses_newscr_ret_retptr = mklualib_curses_newscr_ret;
+	}
 	return 1;
 }
 
@@ -2070,6 +2096,7 @@ int mklualib_curses_getnstr(lua_State* L)
 	int _arg0 = (int) lua_tonumber(L, 1);
 	char* mklualib_curses_getnstr_ret = (char*) luacurses_getnstr(_arg0);
 	lua_pushstring(L, mklualib_curses_getnstr_ret);
+	free(mklualib_curses_getnstr_ret);
 	return 1;
 }
 
@@ -2078,8 +2105,12 @@ int mklualib_curses_getwin(lua_State* L)
 {
 	FILE* _arg0 = tofile(L, 1);
 	WINDOW* mklualib_curses_getwin_ret = (WINDOW*) getwin(_arg0);
-	WINDOW** mklualib_curses_getwin_ret_retptr = luacurses_newwindow(L);
-	*mklualib_curses_getwin_ret_retptr = mklualib_curses_getwin_ret;
+	if (mklualib_curses_getwin_ret == NULL) lua_pushnil(L);
+	else
+	{
+		WINDOW** mklualib_curses_getwin_ret_retptr = luacurses_newwindow(L);
+		*mklualib_curses_getwin_ret_retptr = mklualib_curses_getwin_ret;
+	}
 	return 1;
 }
 
@@ -2138,8 +2169,12 @@ int mklualib_curses_inch(lua_State* L)
 int mklualib_curses_initscr(lua_State* L)
 {
 	WINDOW* mklualib_curses_initscr_ret = (WINDOW*) initscr();
-	WINDOW** mklualib_curses_initscr_ret_retptr = luacurses_newwindow(L);
-	*mklualib_curses_initscr_ret_retptr = mklualib_curses_initscr_ret;
+	if (mklualib_curses_initscr_ret == NULL) lua_pushnil(L);
+	else
+	{
+		WINDOW** mklualib_curses_initscr_ret_retptr = luacurses_newwindow(L);
+		*mklualib_curses_initscr_ret_retptr = mklualib_curses_initscr_ret;
+	}
 	return 1;
 }
 
@@ -2360,6 +2395,7 @@ int mklualib_curses_mvgetnstr(lua_State* L)
 	int _arg2 = (int) lua_tonumber(L, 3);
 	char* mklualib_curses_mvgetnstr_ret = (char*) luacurses_mvgetnstr(_arg0, _arg1, _arg2);
 	lua_pushstring(L, mklualib_curses_mvgetnstr_ret);
+	free(mklualib_curses_mvgetnstr_ret);
 	return 1;
 }
 
@@ -2469,8 +2505,12 @@ int mklualib_curses_newpad(lua_State* L)
 	int _arg0 = (int) lua_tonumber(L, 1);
 	int _arg1 = (int) lua_tonumber(L, 2);
 	WINDOW* mklualib_curses_newpad_ret = (WINDOW*) newpad(_arg0, _arg1);
-	WINDOW** mklualib_curses_newpad_ret_retptr = luacurses_newwindow(L);
-	*mklualib_curses_newpad_ret_retptr = mklualib_curses_newpad_ret;
+	if (mklualib_curses_newpad_ret == NULL) lua_pushnil(L);
+	else
+	{
+		WINDOW** mklualib_curses_newpad_ret_retptr = luacurses_newwindow(L);
+		*mklualib_curses_newpad_ret_retptr = mklualib_curses_newpad_ret;
+	}
 	return 1;
 }
 
@@ -2481,8 +2521,12 @@ int mklualib_curses_newterm(lua_State* L)
 	FILE* _arg1 = tofile(L, 2);
 	FILE* _arg2 = tofile(L, 3);
 	SCREEN* mklualib_curses_newterm_ret = (SCREEN*) newterm(_arg0, _arg1, _arg2);
-	SCREEN** mklualib_curses_newterm_ret_retptr = luacurses_newscreen(L);
-	*mklualib_curses_newterm_ret_retptr = mklualib_curses_newterm_ret;
+	if (mklualib_curses_newterm_ret == NULL) lua_pushnil(L);
+	else
+	{
+		SCREEN** mklualib_curses_newterm_ret_retptr = luacurses_newscreen(L);
+		*mklualib_curses_newterm_ret_retptr = mklualib_curses_newterm_ret;
+	}
 	return 1;
 }
 
@@ -2494,8 +2538,12 @@ int mklualib_curses_newwin(lua_State* L)
 	int _arg2 = (int) lua_tonumber(L, 3);
 	int _arg3 = (int) lua_tonumber(L, 4);
 	WINDOW* mklualib_curses_newwin_ret = (WINDOW*) newwin(_arg0, _arg1, _arg2, _arg3);
-	WINDOW** mklualib_curses_newwin_ret_retptr = luacurses_newwindow(L);
-	*mklualib_curses_newwin_ret_retptr = mklualib_curses_newwin_ret;
+	if (mklualib_curses_newwin_ret == NULL) lua_pushnil(L);
+	else
+	{
+		WINDOW** mklualib_curses_newwin_ret_retptr = luacurses_newwindow(L);
+		*mklualib_curses_newwin_ret_retptr = mklualib_curses_newwin_ret;
+	}
 	return 1;
 }
 
@@ -2740,8 +2788,12 @@ int mklualib_curses_subpad(lua_State* L)
 	int _arg3 = (int) lua_tonumber(L, 4);
 	int _arg4 = (int) lua_tonumber(L, 5);
 	WINDOW* mklualib_curses_subpad_ret = (WINDOW*) subpad(_arg0, _arg1, _arg2, _arg3, _arg4);
-	WINDOW** mklualib_curses_subpad_ret_retptr = luacurses_newwindow(L);
-	*mklualib_curses_subpad_ret_retptr = mklualib_curses_subpad_ret;
+	if (mklualib_curses_subpad_ret == NULL) lua_pushnil(L);
+	else
+	{
+		WINDOW** mklualib_curses_subpad_ret_retptr = luacurses_newwindow(L);
+		*mklualib_curses_subpad_ret_retptr = mklualib_curses_subpad_ret;
+	}
 	return 1;
 }
 
@@ -2754,8 +2806,12 @@ int mklualib_curses_subwin(lua_State* L)
 	int _arg3 = (int) lua_tonumber(L, 4);
 	int _arg4 = (int) lua_tonumber(L, 5);
 	WINDOW* mklualib_curses_subwin_ret = (WINDOW*) subwin(_arg0, _arg1, _arg2, _arg3, _arg4);
-	WINDOW** mklualib_curses_subwin_ret_retptr = luacurses_newwindow(L);
-	*mklualib_curses_subwin_ret_retptr = mklualib_curses_subwin_ret;
+	if (mklualib_curses_subwin_ret == NULL) lua_pushnil(L);
+	else
+	{
+		WINDOW** mklualib_curses_subwin_ret_retptr = luacurses_newwindow(L);
+		*mklualib_curses_subwin_ret_retptr = mklualib_curses_subwin_ret;
+	}
 	return 1;
 }
 

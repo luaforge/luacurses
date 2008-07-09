@@ -46,6 +46,7 @@ base_types = {};
 typedefs = {};
 meta_c_names = {};
 meta_funs = {};
+meta_flags = {};
 
 infile = arg[1];
 outfile = arg[2];
@@ -91,6 +92,10 @@ end
 
 function get_reg_fun(t)
     return meta_funs[std_type(t, true)].Reg;
+end
+
+function get_meta_flags(t)
+    return meta_flags[std_type(t, true)];
 end
 
 function get_module_name(mo)
@@ -172,10 +177,12 @@ for l in io.lines(infile) do
 		m = std_type(m);
 		my_assert(not typedefs[m] and not base_types[m], "type '" .. m .. "' is already defined");
 		base_types[m] = true;
-		local b, e, known, c_name, fun_to, fun_new, fun_reg = string.find(rest,
-				    "^%s*(!?)%s*@([%a_][%w_]*)%s*@([%a_][%w_]*)%s*@([%a_][%w_]*)%s*@([%a_][%w_]*)%s*$");
+		local b, e, known, pointer, c_name, fun_to, fun_new, fun_reg = string.find(rest,
+				    "^%s*(!?)(%*?)%s*@([%a_][%w_]*)%s*@([%a_][%w_]*)%s*@([%a_][%w_]*)%s*@([%a_][%w_]*)%s*$");
 		meta_c_names[m] = c_name;
 		meta_funs[m] = {To = fun_to, New = fun_new, Reg = fun_reg};
+		meta_flags[m] = {};
+		if (pointer ~= "") then meta_flags[m].Pointer = true; end
 		if (known == "") then
 		    meta_name = m;
 		    modules[module_name].Metas[meta_name] = {};
@@ -340,9 +347,18 @@ for l in io.lines(infile) do
 		    elseif (_type == "char") then
 			f:write("\tlua_pushlstring(" .. lua_state_name .. ", &" .. _v.Name .. ", 1);\n");
 		    elseif (_type == "userdata") then
-			f:write("\t" .. _v.Type .. "* " .. _v.Name .. "_retptr = " .. get_new_fun(_v.Type) .. "(" ..
-			lua_state_name .. ");\n");
-			f:write("\t*" .. _v.Name .. "_retptr = " .. _v.Name .. ";\n");
+			local _shift = "";
+			if (get_meta_flags(_v.Type).Pointer) then
+			    f:write("\tif (" .. _v.Name .. " == NULL) lua_pushnil(" .. lua_state_name .. ");\n");
+			    f:write("\telse\n\t{\n");
+			    _shift = "\t";
+			end
+			f:write(_shift .. "\t" .. _v.Type .. "* " .. _v.Name .. "_retptr = " .. get_new_fun(_v.Type) .. "(" ..
+				lua_state_name .. ");\n");
+			f:write(_shift .. "\t*" .. _v.Name .. "_retptr = " .. _v.Name .. ";\n");
+			if (get_meta_flags(_v.Type).Pointer) then
+			    f:write("\t}\n");
+			end
 		    end
 		end);
 		if (string.len(ret_free) ~= 0) then
